@@ -1,0 +1,9 @@
+venv
+version.txt
+*.sublime-*
+compiler.jar
+
+examples
+pano
+sound
+lib/three.js
