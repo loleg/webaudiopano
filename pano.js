@@ -3,11 +3,11 @@ var soundFiles = [
 	"La Chambre.mp3",
 	"L'Argo.mp3",
 	"Jesrad.mp3",
-	"Combien etaient-ils.mp3",
+	"Combien etaient-ils.mp3"/*,
 	"Chronos II.mp3",
 	"D_O_M_Collage_Mockup_v1.mp3",
 	"Dreams_Themes_BacktoBack_ref-01.mp3",
-	"Center Speakers.mp3"
+	"Center Speakers.mp3"*/
 ];
 
 var camera, scene, renderer;
@@ -101,6 +101,7 @@ function loadSound(soundFileName) {
 }
 
 function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
+
 	//var p = object.matrixWorld.getPosition();
 	var p = new THREE.Vector3()
 			.getPositionFromMatrix(object.matrixWorld);
@@ -112,47 +113,51 @@ function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
 			.getPositionFromMatrix(object.matrixWorld);
 	var dx = q.x-px, dy = q.y-py, dz = q.z-pz;
 	audioNode.setPosition(q.x, q.y, q.z);
-  }
+}
 
-  function setPosition(object, x, y, z, dt) {
+function setPosition(object, x, y, z, dt) {
+
 	setPositionAndVelocity(object, object.sound.panner, x, y, z, dt);
-	  var vec = new THREE.Vector3(0,0,1);
-	  var m = object.matrixWorld;
-	  var mx = m.n14, my = m.n24, mz = m.n34;
-	  m.n14 = m.n24 = m.n34 = 0;
-	  vec.applyMatrix3(m);
-	  //m.multiplyVector3(vec);
-	  vec.normalize();
-	  object.sound.panner.setOrientation(vec.x, vec.y, vec.z);
-	  m.n14 = mx;
-	  m.n24 = my; 
-	  m.n34 = mz;
-  }
+	var vec = new THREE.Vector3(0,0,1);
+	var m = object.matrixWorld;
+	var mx = m.n14, my = m.n24, mz = m.n34;
+	m.n14 = m.n24 = m.n34 = 0;
+	vec.applyMatrix3(m);
+	//m.multiplyVector3(vec);
+	vec.normalize();
+	object.sound.panner.setOrientation(vec.x, vec.y, vec.z);
+	m.n14 = mx;
+	m.n24 = my; 
+	m.n34 = mz;
+}
 
-  function setListenerPosition(object, x, y, z, dt) {
+function setListenerPosition(object, x, y, z, dt) {
+	
 	setPositionAndVelocity(object, audio.context.listener, x, y, z, dt);
-	  var m = object.matrix;
-	  var mx = m.n14, my = m.n24, mz = m.n34;
-	  m.n14 = m.n24 = m.n34 = 0;
 
-	  var vec = new THREE.Vector3(0,0,1);
-	  vec.applyMatrix3(m);
-	  //m.multiplyVector3(vec);
-	  vec.normalize();
+	var m = object.matrix;
+	var mx = m.n14, my = m.n24, mz = m.n34;
+	m.n14 = m.n24 = m.n34 = 0;
 
-	  var up = new THREE.Vector3(0,-1,0);
-	  up.applyMatrix3(m);
-	  //m.multiplyVector3(up);
-	  up.normalize();
+	var vec = new THREE.Vector3(0,0,1);
+	vec.applyMatrix3(m);
+	//m.multiplyVector3(vec);
+	vec.normalize();
 
-	  audio.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
+	var up = new THREE.Vector3(0,-1,0);
+	up.applyMatrix3(m);
+	//m.multiplyVector3(up);
+	up.normalize();
 
-	  m.n14 = mx;
-	  m.n24 = my; 
-	  m.n34 = mz;
-  }
+	audio.context.listener.setOrientation(vec.x, vec.y, vec.z, up.x, up.y, up.z);
 
-  function updateAura() {
+	m.n14 = mx;
+	m.n24 = my; 
+	m.n34 = mz;
+}
+
+function updateAura() {
+
 	var cp = camera.position;
 	var camZ = cp.z, camX = cp.x, camY = cp.y;
 	setListenerPosition(camera, camX, camY, camZ, 0);
@@ -160,13 +165,30 @@ function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
 	var cx = camX, cy = camY, cz = camZ;
 
 	var cl = cubes.length;
-	
+
+	var degabs = (theta * 180/Math.PI) % 360;
+	degabs = (degabs < 0) ? 360 + degabs : degabs;
+
+	var maxdist = 0.5 * 360/cl;
+
 	// Oscillating function
 	cubes.forEach(function(c, i) {
-		setPosition(c, cx + (Math.sin( (theta / 2) - (Math.PI/cl) * i ) * 50), cy, cz, 0);
+		var dist = Math.abs((360*i/cl) - degabs);
+		if (i == 0 && degabs > 180) 
+			dist = Math.abs(360 - degabs);
+
+		if (dist > maxdist) {
+			setPosition(c, 99999, 0, 0, 0);	
+		} else {
+			var offset = Math.sin( (theta / 2) - (Math.PI/cl) * i ) * 50;
+			setPosition(c, cx + offset, cy, cz, 0);
+
+			// For debugging
+			document.title = c.soundFile + " " + parseInt(degabs);
+		}
 	});
 
-  }
+} // -updateAura
 
 function initScene() {
 
@@ -199,10 +221,8 @@ function initScene() {
 	document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
 	document.addEventListener( 'DOMMouseScroll', onDocumentMouseWheel, false);
 
-	//
-
 	window.addEventListener( 'resize', onWindowResize, false );
-}
+} // -initScene
 
 function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
@@ -231,36 +251,25 @@ function onDocumentMouseMove( event ) {
 }
 
 function onDocumentMouseUp( event ) {
-
 	isUserInteracting = false;
-
 }
 
 function onDocumentMouseWheel( event ) {
-
 	// WebKit
-
 	if ( event.wheelDeltaY ) {
-
 		fov -= event.wheelDeltaY * 0.05;
 
 	// Opera / Explorer 9
-
 	} else if ( event.wheelDelta ) {
-
 		fov -= event.wheelDelta * 0.05;
 
 	// Firefox
-
 	} else if ( event.detail ) {
-
 		fov += event.detail * 1.0;
-
 	}
 
 	camera.projectionMatrix.makePerspective( fov, window.innerWidth / window.innerHeight, 1, 1100 );
 	render();
-
 }
 
 function animate() {
@@ -280,7 +289,6 @@ function animate() {
 	render();
 
 	updateAura();
-
 }
 
 function render() {
@@ -325,17 +333,17 @@ function initCubes() {
 			);
 		cube.visible = false;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
+		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );
 		cubes.push(cube);
 
 		var sign = new THREE.Mesh( 
-				new THREE.CubeGeometry( 5, 5, 5 ), 
+				new THREE.CubeGeometry( 1, 1, 1 ), 
 				new THREE.MeshBasicMaterial( { color: 0x0000ff } )
 			);
 		sign.position.set(X, 0, Z);
 		scene.add( sign );
 		signs.push(sign);
-
 	}
 
-}
+} // -initCubes
