@@ -85,12 +85,13 @@ function loadSound(soundFileName) {
 	sound.panner.connect(audio.destination);
 
 	setTimeout(function(){
-	loadBuffer(soundFileName, function(buffer){
-	  sound.buffer = buffer;
-	  sound.source.buffer = sound.buffer;
-	  loadProgress(1);
-	});
-}, 1000);
+		loadBuffer(soundFileName, 
+			function(buffer){
+			  sound.buffer = buffer;
+			  sound.source.buffer = sound.buffer;
+			  loadProgress(1);
+			});
+	}, 250);
 
 	return sound;
 }
