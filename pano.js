@@ -13,8 +13,9 @@ phi = 0, theta = 0;
 
 var cubes = [];
 var audio;
+var loading = 0;
 var soundFiles = PANO.soundFiles;
-var loading = 0, loadingDone = soundFiles.length;
+var loadingDone = soundFiles.length;
 
 initAura();
 initScene();
@@ -83,13 +84,22 @@ function loadSound(soundFileName) {
 	sound.volume.connect(sound.panner);
 	sound.panner.connect(audio.destination);
 
+	setTimeout(function(){
 	loadBuffer(soundFileName, function(buffer){
 	  sound.buffer = buffer;
 	  sound.source.buffer = sound.buffer;
-	  loading++;
+	  loadProgress(1);
 	});
+}, 1000);
 
 	return sound;
+}
+
+function loadProgress(dir) {
+	loading += dir;
+	var pc = parseInt(100 * (loading+1) / loadingDone) + '%';
+	document.getElementById('pc').style.width = pc;
+	document.getElementById('pctx').innerHTML = 'loading ' + pc;
 }
 
 function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
@@ -323,7 +333,7 @@ function initCubes() {
 				new THREE.CubeGeometry( 1, 1, 1 ), 
 				new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 			);
-		cube.visible = true;
+		cube.visible = false;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );

@@ -3,18 +3,59 @@ body {
 	margin: 0px;
 	overflow: hidden;
 }
+
 #loading {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	width: 200px;
-	height: 50px;
+	width: 614px;
+	height: auto;
 	line-height: 50px;
 	font-size: 16px;
 	font-family: Helvetica, Arial;
-	color: #333;
-	background: #fff;
-	margin-left: -100px;
-	margin-top: -25px;
+	color: #999;
+	background: #000;
+	margin-left: -305px;
+	margin-top: -50px;
 	text-align: center;
+}
+
+#title {
+	display: inline-block;
+	background: transparent url(img/title.png);
+	width: 613px; height: 73px;
+	font-size: 0px; text-indent: -9999px;
+}
+
+#credit {
+	display: block;
+	background: transparent url(img/credit.png);
+	width: 399px; height: 32px;
+	font-size: 0px; text-indent: -9999px;
+	position: fixed; 
+	bottom: 20px; left: 50%;
+	margin-left: -200px;
+}
+
+#progress {
+	text-align: right;
+	color: #777;
+	margin-top: 1em;
+}
+
+#progress div {
+	display: block;
+	width: 100%;
+	border: 1px solid #999;
+	border-radius: 5px;
+	height: 8px;
+	text-align: left;
+	padding: 0 1px;
+}
+
+#progress b {
+	background: #fff;
+	display: inline-block;
+	border-radius: 5px;
+	height: 6px; width: 0%;
 }
