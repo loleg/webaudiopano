@@ -1,14 +1,5 @@
-var panoramaFile = 'pano/6K_1381492158_604799-0-25-1.jpeg';
-var soundFiles = [
-	"La Chambre.mp3",
-	"L'Argo.mp3",
-	"Jesrad.mp3",
-	"Combien etaient-ils.mp3"/*,
-	"Chronos II.mp3",
-	"D_O_M_Collage_Mockup_v1.mp3",
-	"Dreams_Themes_BacktoBack_ref-01.mp3",
-	"Center Speakers.mp3"*/
-];
+var PANO = {};
+PANO.main = function() {
 
 var camera, scene, renderer;
 
@@ -22,6 +13,7 @@ phi = 0, theta = 0;
 
 var cubes = [];
 var audio;
+var soundFiles = PANO.soundFiles;
 var loading = 0, loadingDone = soundFiles.length;
 
 initAura();
@@ -205,7 +197,7 @@ function initScene() {
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
 	var material = new THREE.MeshBasicMaterial( {
-		map: THREE.ImageUtils.loadTexture( panoramaFile )
+		map: THREE.ImageUtils.loadTexture( PANO.panoramaFile )
 	} );
 
 	mesh = new THREE.Mesh( geometry, material );
@@ -331,7 +323,7 @@ function initCubes() {
 				new THREE.CubeGeometry( 1, 1, 1 ), 
 				new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 			);
-		cube.visible = false;
+		cube.visible = true;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );
@@ -347,3 +339,5 @@ function initCubes() {
 	}
 
 } // -initCubes
+
+}; // PANO.main
