@@ -14,7 +14,7 @@ phi = 0, theta = 0;
 var cubes = [];
 var audio;
 var loading = 0;
-var soundFiles = PANO.soundFiles;
+var soundFiles = PANO.sounds;
 var loadingDone = soundFiles.length;
 
 initAura();
@@ -176,14 +176,14 @@ function updateAura() {
 
 	// Oscillating function
 	cubes.forEach(function(c, i) {
-		var dist = Math.abs((360*i/cl) - degabs);
+		var dist = Math.abs(c.orientdeg - degabs);
 		if (i == 0 && degabs > 180) 
 			dist = Math.abs(360 - degabs);
 
 		if (dist > maxdist) {
 			setPosition(c, 99999, 0, 0, 0);	
 		} else {
-			var offset = Math.sin( (theta / 2) - (Math.PI/cl) * i ) * 50;
+			var offset = Math.sin( theta - c.orient ) * 50;
 			setPosition(c, cx + offset, cy, cz, 0);
 
 			// For debugging
@@ -208,7 +208,7 @@ function initScene() {
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
 	var material = new THREE.MeshBasicMaterial( {
-		map: THREE.ImageUtils.loadTexture( PANO.panoramaFile )
+		map: THREE.ImageUtils.loadTexture( PANO.panorama )
 	} );
 
 	mesh = new THREE.Mesh( geometry, material );
@@ -324,9 +324,16 @@ function initCubes() {
 	var resolution = soundFiles.length;
 	var amplitude = 20;
 	var size = 360 / resolution;
+	var degs = PANO.degrees;
 
 	for (var i = 0; i < resolution; i++) {
-		var segment = ( i * size ) * Math.PI / 180;
+
+		var segment = ( i*size ) * Math.PI/180;
+		if (PANO.degrees.length > i) {
+			segment = PANO.degrees[i] * Math.PI/180;
+		}
+		//console.log(i, segment * 180 / Math.PI);
+
 		var X = Math.cos( segment ) * amplitude;
 		var Z = Math.sin( segment ) * amplitude;
 
@@ -334,17 +341,22 @@ function initCubes() {
 				new THREE.CubeGeometry( 1, 1, 1 ), 
 				new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 			);
-		cube.visible = false;
+		cube.visible = true;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );
 		cubes.push(cube);
 
 		var sign = new THREE.Mesh( 
-				new THREE.CubeGeometry( 1, 1, 1 ), 
+				new THREE.CubeGeometry( 0.5, 0.5, 0.5 ), 
 				new THREE.MeshBasicMaterial( { color: 0x0000ff } )
 			);
+		
 		sign.position.set(X, 0, Z);
+		cube.origin = sign.position;
+		cube.orient = segment;
+		cube.orientdeg = segment * 180/Math.PI;
+
 		scene.add( sign );
 		signs.push(sign);
 	}
