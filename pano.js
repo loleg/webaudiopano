@@ -187,7 +187,7 @@ function updateAura() {
 			setPosition(c, cx + offset, cy, cz, 0);
 
 			// For debugging
-			document.title = c.soundFile + " " + parseInt(degabs);
+			document.title = c.soundFile; // + " " + parseInt(degabs);
 		}
 	});
 
@@ -341,7 +341,7 @@ function initCubes() {
 				new THREE.CubeGeometry( 1, 1, 1 ), 
 				new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 			);
-		cube.visible = true;
+		cube.visible = false;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );
@@ -352,6 +352,7 @@ function initCubes() {
 				new THREE.MeshBasicMaterial( { color: 0x0000ff } )
 			);
 		
+		sign.visible = false;
 		sign.position.set(X, 0, Z);
 		cube.origin = sign.position;
 		cube.orient = segment;
