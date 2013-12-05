@@ -1,16 +1,28 @@
+/*
+ Filename of the panorama scene
+*/
 PANO.panorama = 
 	'pano/enfuse3.jpeg';
+
+/*
+ Music files and their location in degrees off center, left to right
+ - e.g. 0 = in front at start, 180 = in the back at start
+ - set to null to use the default equidistant placement
+*/
 PANO.sounds = [
-	"Center Speakers.mp3",
-	"La Chambre.mp3",
-	"L'Argo.mp3",
-	"Jesrad.mp3",
-	"Combien etaient-ils.mp3",
-	"Chronos II.mp3",
-	//"D_O_M_Collage_Mockup_v1.mp3",
-	//"Dreams_Themes_BacktoBack_ref-01.mp3"
+	[ "Center Speakers.mp3", 0 ],
+	[ "La Chambre.mp3", 57 ],
+	[ "L'Argo.mp3", 95 ],
+	[ "Jesrad.mp3", 165 ],
+	[ "Combien etaient-ils.mp3", 225 ],
+	[ "Chronos II.mp3", 280 ],
+	//[ "D_O_M_Collage_Mockup_v1.mp3", null ],
+	//[ "Dreams_Themes_BacktoBack_ref-01.mp3", null ],
 ];
-PANO.degrees = [
-	0, 57, 95, 165, 225, 280
-];
-PANO.main();
+
+/* 
+ When true, shows blue dots ("helpers") at the sound locations,
+ the sound currently playing, and orientation of the camera in 
+ the browser title.
+*/
+PANO.helper = true;

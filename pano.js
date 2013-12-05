@@ -14,7 +14,20 @@ phi = 0, theta = 0;
 var cubes = [];
 var audio;
 var loading = 0;
-var soundFiles = PANO.sounds;
+var soundFiles = [];
+var soundPos = [];
+
+// Load configuration
+PANO.sounds.forEach(function(s) {
+	if (s.length != 2) 
+		return console.error("Invalid config", s);
+	soundFiles.push(s[0]);
+	soundPos.push(s[1]);
+});
+if (PANO.helper) {
+	document.write('<div id="crosshair"></div>');
+}
+
 var loadingDone = soundFiles.length;
 
 initAura();
@@ -187,7 +200,9 @@ function updateAura() {
 			setPosition(c, cx + offset, cy, cz, 0);
 
 			// For debugging
-			document.title = c.soundFile; // + " " + parseInt(degabs);
+			if (PANO.helper) {
+				document.title = c.soundFile + " ~" + parseInt(degabs);
+			}
 		}
 	});
 
@@ -324,13 +339,12 @@ function initCubes() {
 	var resolution = soundFiles.length;
 	var amplitude = 20;
 	var size = 360 / resolution;
-	var degs = PANO.degrees;
 
 	for (var i = 0; i < resolution; i++) {
 
 		var segment = ( i*size ) * Math.PI/180;
-		if (PANO.degrees.length > i) {
-			segment = PANO.degrees[i] * Math.PI/180;
+		if (soundPos.length > i) {
+			segment = soundPos[i] * Math.PI/180;
 		}
 		//console.log(i, segment * 180 / Math.PI);
 
@@ -352,7 +366,7 @@ function initCubes() {
 				new THREE.MeshBasicMaterial( { color: 0x0000ff } )
 			);
 		
-		sign.visible = false;
+		sign.visible = PANO.helper;
 		sign.position.set(X, 0, Z);
 		cube.origin = sign.position;
 		cube.orient = segment;
