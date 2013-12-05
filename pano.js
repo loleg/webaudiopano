@@ -201,9 +201,8 @@ function updateAura() {
 
 			// For debugging
 			if (PANO.helper) {
-				//document.title = c.soundFile + " ~" + parseInt(degabs);
+				document.title = c.soundFile + " ~" + parseInt(degabs);
 			}
-			document.title = offset;
 		}
 	});
 
@@ -286,6 +285,9 @@ function onDocumentMouseWheel( event ) {
 	} else if ( event.detail ) {
 		fov += event.detail * 1.0;
 	}
+
+	// Set bounds for zooming
+	fov = Math.min(Math.max(fov, 20), 70);
 
 	camera.projectionMatrix.makePerspective( fov, window.innerWidth / window.innerHeight, 1, 1100 );
 	render();
