@@ -11,7 +11,7 @@ lon = 0, onMouseDownLon = 0,
 lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
-var cubes = [];
+var orbs = [];
 var audio;
 var loading = 0;
 var soundFiles = [];
@@ -19,7 +19,7 @@ var soundPos = [];
 
 // Load configuration
 PANO.sounds.forEach(function(s) {
-	if (s.length != 2) 
+	if (s.length < 2) 
 		return console.error("Invalid config", s);
 	soundFiles.push(s[0]);
 	soundPos.push(s[1]);
@@ -32,7 +32,7 @@ var loadingDone = soundFiles.length;
 
 initAura();
 initScene();
-initCubes();
+initOrbs();
 
 animate(); // go!
 
@@ -180,7 +180,7 @@ function updateAura() {
 
 	var cx = camX, cy = camY, cz = camZ;
 
-	var cl = cubes.length;
+	var cl = orbs.length;
 
 	var degabs = (theta * 180/Math.PI) % 360;
 	degabs = (degabs < 0) ? 360 + degabs : degabs;
@@ -188,7 +188,7 @@ function updateAura() {
 	var maxdist = 0.5 * 360/cl;
 
 	// Oscillating function
-	cubes.forEach(function(c, i) {
+	orbs.forEach(function(c, i) {
 		var dist = Math.abs(c.orientdeg - degabs);
 		if (i == 0 && degabs > 180) 
 			dist = Math.abs(360 - degabs);
@@ -298,7 +298,7 @@ function animate() {
 	else if (loading == loadingDone) { // run once
 		document.getElementById('loading').style.display = 'none';
 		var ctx = audio.context;
-		cubes.forEach(function(c) {
+		orbs.forEach(function(c) {
 			c.sound.source.start(ctx.currentTime + 0.020);
 		});
 		loading++;
@@ -332,7 +332,7 @@ function render() {
 
 }
 
-function initCubes() {
+function initOrbs() {
 
 	var signs = [];
 
@@ -350,6 +350,11 @@ function initCubes() {
 
 		var X = Math.cos( segment ) * amplitude;
 		var Z = Math.sin( segment ) * amplitude;
+		
+		var Y = 0;
+		if (PANO.sounds[i].length > 2) {
+			Y = PANO.sounds[i][2];
+		}
 
 		var cube = new THREE.Mesh( 
 				new THREE.CubeGeometry( 1, 1, 1 ), 
@@ -359,15 +364,15 @@ function initCubes() {
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
 		scene.add( cube );
-		cubes.push(cube);
+		orbs.push(cube);
 
 		var sign = new THREE.Mesh( 
-				new THREE.CubeGeometry( 0.5, 0.5, 0.5 ), 
-				new THREE.MeshBasicMaterial( { color: 0x0000ff } )
+				new THREE.SphereGeometry( 5, 10, 10 ), 
+				new THREE.MeshBasicMaterial( { color: 0x0000ff, transparent: true, opacity: 0.4 } )
 			);
 		
 		sign.visible = PANO.helper;
-		sign.position.set(X, 0, Z);
+		sign.position.set(X, Y, Z);
 		cube.origin = sign.position;
 		cube.orient = segment;
 		cube.orientdeg = segment * 180/Math.PI;
@@ -376,6 +381,6 @@ function initCubes() {
 		signs.push(sign);
 	}
 
-} // -initCubes
+} // -initOrbs
 
 }; // PANO.main
