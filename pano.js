@@ -1,7 +1,7 @@
 var PANO = {};
 PANO.main = function() {
 
-var camera, scene, renderer;
+var camera, scene, renderer, tween;
 
 var fov = 70,
 texture_placeholder,
@@ -12,6 +12,7 @@ lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
 var orbs = [];
+var currentOrb = 0;
 var audio;
 var loading = 0;
 var soundFiles = [];
@@ -33,6 +34,7 @@ var loadingDone = soundFiles.length;
 initAura();
 initScene();
 initOrbs();
+initUI();
 
 animate(); // go!
 
@@ -172,42 +174,6 @@ function setListenerPosition(object, x, y, z, dt) {
 	m.n34 = mz;
 }
 
-function updateAura() {
-
-	var cp = camera.position;
-	var camZ = cp.z, camX = cp.x, camY = cp.y;
-	setListenerPosition(camera, camX, camY, camZ, 0);
-
-	var cx = camX, cy = camY, cz = camZ;
-
-	var cl = orbs.length;
-
-	var degabs = (theta * 180/Math.PI) % 360;
-	degabs = (degabs < 0) ? 360 + degabs : degabs;
-
-	var maxdist = 0.5 * 360/cl;
-
-	// Oscillating function
-	orbs.forEach(function(c, i) {
-		var dist = Math.abs(c.orientdeg - degabs);
-		if (i == 0 && degabs > 180) 
-			dist = Math.abs(360 - degabs);
-
-		if (dist > maxdist) {
-			setPosition(c, 99999, 0, 0, 0);	
-		} else {
-			var offset = Math.pow(( theta - c.orient )*5,3);
-			setPosition(c, cx, cy, cz + offset, 0);
-
-			// For debugging
-			if (PANO.helper) {
-				document.title = c.soundFile + " ~" + parseInt(degabs);
-			}
-		}
-	});
-
-} // -updateAura
-
 function initScene() {
 
 	var container, mesh;
@@ -295,11 +261,12 @@ function onDocumentMouseWheel( event ) {
 
 function animate() {
 
-	requestAnimationFrame( animate );
+	requestAnimationFrame(animate);
 
 	if (loading < loadingDone) { return; }
 	else if (loading == loadingDone) { // run once
 		document.getElementById('loading').style.display = 'none';
+		document.getElementById('controls').classList.remove('hide');
 		var ctx = audio.context;
 		orbs.forEach(function(c) {
 			c.sound.source.start(ctx.currentTime + 0.020);
@@ -307,9 +274,9 @@ function animate() {
 		loading++;
 	}
 
-	render();
-
+	TWEEN.update();
 	updateAura();
+	render();
 }
 
 function render() {
@@ -385,5 +352,74 @@ function initOrbs() {
 	}
 
 } // -initOrbs
+
+function updateAura() {
+
+	var cp = camera.position;
+	var camZ = cp.z, camX = cp.x, camY = cp.y;
+	setListenerPosition(camera, camX, camY, camZ, 0);
+
+	var cx = camX, cy = camY, cz = camZ;
+
+	var cl = orbs.length;
+
+	var degabs = (theta * 180/Math.PI) % 360;
+	degabs = (degabs < 0) ? 360 + degabs : degabs;
+
+	var maxdist = 0.5 * 360/cl;
+
+	// Oscillating function
+	orbs.forEach(function(c, i) {
+		var dist = Math.abs(c.orientdeg - degabs);
+		if (i == 0 && degabs > 180) 
+			dist = Math.abs(360 - degabs);
+
+		if (dist > maxdist) {
+			setPosition(c, 99999, 0, 0, 0);	
+		} else {
+			var offset = Math.pow(( theta - c.orient )*5,3);
+			setPosition(c, cx, cy, cz + offset, 0);
+			currentOrb = i;
+
+			// For debugging
+			if (PANO.helper) {
+				document.title = c.soundFile + " ~" + parseInt(degabs);
+			}
+		}
+	});
+
+} // -updateAura
+
+function swingCam(a, b) {
+	//lon = soundPos[b];
+
+	tween = new TWEEN
+		.Tween({ lon: soundPos[a] })
+		.to({ lon: soundPos[b] }, 2000 )
+		.easing( TWEEN.Easing.Cubic.Out )
+		.onUpdate(function () {
+			lon = this.lon;
+		}).start();
+} // -swingTo
+
+function initUI() {
+
+	document.getElementById('next').onclick = function() {
+		var from = currentOrb;
+		currentOrb = (++currentOrb == orbs.length) ? 0 : currentOrb;
+		swingCam(from, currentOrb);
+	};
+
+	document.getElementById('prev').onclick = function() {
+		var from = currentOrb;
+		if (--currentOrb == -1) {
+			currentOrb = orbs.length-1;
+			swingCam(from, currentOrb); // TODO: backwards
+		} else {
+			swingCam(from, currentOrb);
+		}
+	};
+
+} // -initUI
 
 }; // PANO.main

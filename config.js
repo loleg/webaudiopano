@@ -12,12 +12,12 @@ PANO.panorama =
  area, > 0 is up, < 0 down.
 */
 PANO.sounds = [
-	[ "Center Speakers.mp3", 0 ],/*
+	[ "Center Speakers.mp3", 0 ],
 	[ "La Chambre.mp3", 57, -1 ],
 	[ "L'Argo.mp3", 95, -1 ],
 	[ "Jesrad.mp3", 165, -3 ],
 	[ "Combien etaient-ils.mp3", 225, -2 ],
-	[ "Chronos II.mp3", 280, -2 ],*/
+	[ "Chronos II.mp3", 280, -2 ],
 	//[ "D_O_M_Collage_Mockup_v1.mp3", null ],
 	//[ "Dreams_Themes_BacktoBack_ref-01.mp3", null ],
 ];

@@ -67,3 +67,29 @@ body {
 	height: 30px; width: 1px;
 	margin-top: -15px;
 }
+
+#controls {
+	position: absolute;
+	bottom: 10px;
+	width: 100%;
+	text-align: center;
+}
+
+#controls.hide {
+	opacity: 0;
+}
+
+#controls button {
+	font: 2em sans-serif;
+	padding: 0.5em 0.8em;
+	color: #aaa; 
+	border: 1px solid #aaa;
+	border-radius: 1.2em;
+	background: transparent;
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+#controls button:hover {
+	background: rgba(255,255,255,0.2);
+}
