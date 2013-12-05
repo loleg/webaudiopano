@@ -196,13 +196,14 @@ function updateAura() {
 		if (dist > maxdist) {
 			setPosition(c, 99999, 0, 0, 0);	
 		} else {
-			var offset = Math.sin( theta - c.orient ) * 50;
-			setPosition(c, cx + offset, cy, cz, 0);
+			var offset = Math.pow(( theta - c.orient )*5,3);
+			setPosition(c, cx, cy, cz + offset, 0);
 
 			// For debugging
 			if (PANO.helper) {
-				document.title = c.soundFile + " ~" + parseInt(degabs);
+				//document.title = c.soundFile + " ~" + parseInt(degabs);
 			}
+			document.title = offset;
 		}
 	});
 
