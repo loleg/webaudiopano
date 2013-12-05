@@ -391,15 +391,27 @@ function updateAura() {
 } // -updateAura
 
 function swingCam(a, b) {
-	//lon = soundPos[b];
 
+	//lon = soundPos[b]; // testing
+	var from = soundPos[a],
+		to = soundPos[b];
+
+	// Edges
+	if (a == 0 && b > 1) {
+		from = 360;
+	} else if (b == 0 && a > 1) {
+		to = 360;
+	}
+
+	// Start animation
 	tween = new TWEEN
-		.Tween({ lon: soundPos[a] })
-		.to({ lon: soundPos[b] }, 2000 )
+		.Tween({ lon: from })
+		.to({ lon: to }, 2000 )
 		.easing( TWEEN.Easing.Cubic.Out )
 		.onUpdate(function () {
 			lon = this.lon;
 		}).start();
+
 } // -swingTo
 
 function initUI() {
@@ -412,12 +424,8 @@ function initUI() {
 
 	document.getElementById('prev').onclick = function() {
 		var from = currentOrb;
-		if (--currentOrb == -1) {
-			currentOrb = orbs.length-1;
-			swingCam(from, currentOrb); // TODO: backwards
-		} else {
-			swingCam(from, currentOrb);
-		}
+		currentOrb = (--currentOrb == -1) ? orbs.length-1 : currentOrb;
+		swingCam(from, currentOrb);
 	};
 
 } // -initUI
