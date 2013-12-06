@@ -227,6 +227,31 @@ function onDocumentMouseDown( event ) {
 	onPointerDownLat = lat;
 }
 
+function intersectClick() {
+	var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+	projector.unprojectVector( vector, camera );
+
+	var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+	var intersects = raycaster.intersectObjects( scene.children );
+
+	if ( intersects.length > 0 ) {
+
+		new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
+			x: Math.random() * 800 - 400,
+			y: Math.random() * 800 - 400,
+			z: Math.random() * 800 - 400 }, 2000 )
+		.easing( TWEEN.Easing.Elastic.Out).start();
+
+		new TWEEN.Tween( intersects[ 0 ].object.rotation ).to( {
+			x: Math.random() * 2 * Math.PI,
+			y: Math.random() * 2 * Math.PI,
+			z: Math.random() * 2 * Math.PI }, 2000 )
+		.easing( TWEEN.Easing.Elastic.Out).start();
+
+	}
+}
+
 function onDocumentMouseMove( event ) {
 	if ( isUserInteracting ) {
 		lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
