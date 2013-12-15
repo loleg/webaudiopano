@@ -25,6 +25,13 @@ License terms (AGPL 3.0) specified in LICENSE file.
 			<button id="play">||</button>
 			<button id="next">&gt;</button>
 		</div>
+		<div id="dialog-overlay"></div>
+		<div id="dialog-box">
+			<button class="close">&times;</button>
+			<div class="dialog-content">
+				<div id="dialog-message"></div>
+			</div>
+		</div>
 		<div id="container"></div>
 
 		<script src="lib/three.min.js"></script>
@@ -33,6 +40,6 @@ License terms (AGPL 3.0) specified in LICENSE file.
 
 		<script src="pano.js"></script>
 		<script src="config.js"></script>
-		<script>PANO.main();</script>
+		<script>PANO.popup('hello'); //PANO.main();</script>
 	</body>
 </html>

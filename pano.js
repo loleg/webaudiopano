@@ -454,3 +454,26 @@ function initUI() {
 } // -initUI
 
 }; // PANO.main
+
+PANO.popup = function(message) {
+
+	// display the message
+	$('#dialog-message').html(message);
+		
+	// get the screen height and width  
+	var maskHeight = $(window).height();  
+	var maskWidth = $(window).width();
+	var dialogHeight = 300;
+	$('#dialog-box').height(300);
+	var dialogWidth = 400;
+	$('#dialog-box').width(400);
+	
+	// calculate the values for center alignment
+	var dialogTop =  (maskHeight/2) - (dialogHeight/2);  
+	var dialogLeft = (maskWidth/2) - (dialogWidth/2); 
+	
+	// assign values to the overlay and dialog box
+	$('#dialog-overlay').css({height:maskHeight, width:maskWidth}).show();
+	$('#dialog-box').css({top:dialogTop, left:dialogLeft}).show();
+			
+}; // -PANO.popup
