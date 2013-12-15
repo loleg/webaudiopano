@@ -1,7 +1,7 @@
 var PANO = {};
 PANO.main = function() {
 
-var camera, scene, renderer, tween;
+var camera, scene, renderer, projector, tween;
 
 var fov = 70,
 texture_placeholder,
@@ -11,7 +11,7 @@ lon = 0, onMouseDownLon = 0,
 lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
-var orbs = [];
+var orbs = [], sounds = [];
 var currentOrb = 0;
 var audio, mute = false;
 var loading = 0;
@@ -185,6 +185,8 @@ function initScene() {
 
 	scene = new THREE.Scene();
 
+	projector = new THREE.Projector();
+
 	var geometry = new THREE.SphereGeometry( 500, 60, 40 );
 	geometry.applyMatrix( new THREE.Matrix4().makeScale( -1, 1, 1 ) );
 
@@ -193,6 +195,7 @@ function initScene() {
 	} );
 
 	mesh = new THREE.Mesh( geometry, material );
+	mesh.name = "Panorama";
 	scene.add( mesh );
 
 	renderer = new THREE.WebGLRenderer();
@@ -225,20 +228,15 @@ function onDocumentMouseDown( event ) {
 
 	onPointerDownLon = lon;
 	onPointerDownLat = lat;
-}
 
-function intersectClick() {
 	var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
 	projector.unprojectVector( vector, camera );
 
 	var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-
 	var intersects = raycaster.intersectObjects( scene.children );
 
-	if ( intersects.length > 0 ) {
-
-		console.log(intersects);
-
+	if ( intersects.length > 1 ) {
+		console.log(intersects[0].object.name);
 	}
 }
 
@@ -337,7 +335,7 @@ function initOrbs() {
 		var Z = Math.sin( segment ) * amplitude;
 		
 		var Y = 0;
-		if (PANO.sounds[i].length > 2) {
+		if (PANO.sounds[i][2]) {
 			Y = PANO.sounds[i][2];
 		}
 
@@ -348,6 +346,7 @@ function initOrbs() {
 		cube.visible = false;
 		cube.sound = loadSound('sound/' + soundFiles[i]);
 		cube.soundFile = soundFiles[i].replace('.mp3', '');
+		cube.name = "Soundcube " + i;
 		scene.add( cube );
 		orbs.push(cube);
 
@@ -355,7 +354,7 @@ function initOrbs() {
 				new THREE.SphereGeometry( 5, 10, 10 ), 
 				new THREE.MeshBasicMaterial( { color: 0x0000ff, transparent: true, opacity: 0.4 } )
 			);
-		
+		sign.name = "Orb " + cube.soundFile;
 		sign.visible = PANO.helper;
 		sign.position.set(X, Y, Z);
 		cube.origin = sign.position;
@@ -445,9 +444,10 @@ function initUI() {
 
 	$('#play').click(function() {
 		PANO.mute = !PANO.mute;
+		$(this).html( PANO.mute ? "&#9656;" : "||" );
 		orbs.forEach(function(c) {
 			if (PANO.mute) { c.sound.source.stop(0); }
-			else { c.sound.source.start(ctx.currentTime + 0.020); }
+			else { c.sound.source.start(audio.context.currentTime + 0.020); }
 		});
 	});
 
