@@ -13,7 +13,7 @@ phi = 0, theta = 0;
 
 var orbs = [];
 var currentOrb = 0;
-var audio;
+var audio, mute = false;
 var loading = 0;
 var soundFiles = [];
 var soundPos = [];
@@ -114,8 +114,8 @@ function loadSound(soundFileName) {
 function loadProgress(dir) {
 	loading += dir;
 	var pc = parseInt(100 * (loading+1) / loadingDone) + '%';
-	document.getElementById('pc').style.width = pc;
-	document.getElementById('pctx').innerHTML = 'loading ' + pc;
+	$('#pc').css('width', pc);
+	$('#pctx').html('loading ' + pc);
 }
 
 function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
@@ -178,7 +178,7 @@ function initScene() {
 
 	var container, mesh;
 
-	container = document.getElementById( 'container' );
+	container = $('#container')[0];
 
 	camera = new THREE.PerspectiveCamera( fov, window.innerWidth / window.innerHeight, 1, 1100 );
 	camera.target = new THREE.Vector3( 0, 0, 0 );
@@ -237,17 +237,7 @@ function intersectClick() {
 
 	if ( intersects.length > 0 ) {
 
-		new TWEEN.Tween( intersects[ 0 ].object.position ).to( {
-			x: Math.random() * 800 - 400,
-			y: Math.random() * 800 - 400,
-			z: Math.random() * 800 - 400 }, 2000 )
-		.easing( TWEEN.Easing.Elastic.Out).start();
-
-		new TWEEN.Tween( intersects[ 0 ].object.rotation ).to( {
-			x: Math.random() * 2 * Math.PI,
-			y: Math.random() * 2 * Math.PI,
-			z: Math.random() * 2 * Math.PI }, 2000 )
-		.easing( TWEEN.Easing.Elastic.Out).start();
+		console.log(intersects);
 
 	}
 }
@@ -290,8 +280,8 @@ function animate() {
 
 	if (loading < loadingDone) { return; }
 	else if (loading == loadingDone) { // run once
-		document.getElementById('loading').style.display = 'none';
-		document.getElementById('controls').classList.remove('hide');
+		$('#loading').hide();
+		$('#controls').removeClass('hide');
 		var ctx = audio.context;
 		orbs.forEach(function(c) {
 			c.sound.source.start(ctx.currentTime + 0.020);
@@ -441,17 +431,25 @@ function swingCam(a, b) {
 
 function initUI() {
 
-	document.getElementById('next').onclick = function() {
+	$('#next').click(function() {
 		var from = currentOrb;
 		currentOrb = (++currentOrb == orbs.length) ? 0 : currentOrb;
 		swingCam(from, currentOrb);
-	};
+	});
 
-	document.getElementById('prev').onclick = function() {
+	$('#prev').click(function() {
 		var from = currentOrb;
 		currentOrb = (--currentOrb == -1) ? orbs.length-1 : currentOrb;
 		swingCam(from, currentOrb);
-	};
+	});
+
+	$('#play').click(function() {
+		PANO.mute = !PANO.mute;
+		orbs.forEach(function(c) {
+			if (PANO.mute) { c.sound.source.stop(0); }
+			else { c.sound.source.start(ctx.currentTime + 0.020); }
+		});
+	});
 
 } // -initUI
 
