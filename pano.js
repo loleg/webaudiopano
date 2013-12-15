@@ -12,7 +12,7 @@ lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
 var orbs = [], sounds = [];
-var currentOrb = 0;
+var currentOrb = 0, swinging = false;
 var audio, mute = false;
 var loading = 0;
 var soundFiles = [];
@@ -236,7 +236,8 @@ function onDocumentMouseDown( event ) {
 	var intersects = raycaster.intersectObjects( scene.children );
 
 	if ( intersects.length > 1 ) {
-		console.log(intersects[0].object.name);
+		var nm = intersects[0].object.name;
+		PANO.popup(nm);
 	}
 }
 
@@ -380,7 +381,7 @@ function updateAura() {
 	var degabs = (theta * 180/Math.PI) % 360;
 	degabs = (degabs < 0) ? 360 + degabs : degabs;
 
-	var maxdist = 0.5 * 360/cl;
+	var maxdist = 0.2 * 360/cl;
 
 	// Oscillating function
 	orbs.forEach(function(c, i) {
@@ -393,11 +394,11 @@ function updateAura() {
 		} else {
 			var offset = Math.pow(( theta - c.orient )*5,3);
 			setPosition(c, cx, cy, cz + offset, 0);
-			currentOrb = i;
+			if (!PANO.swinging) currentOrb = i + 1;
 
 			// For debugging
 			if (PANO.helper) {
-				document.title = c.soundFile + " ~" + parseInt(degabs);
+				document.title = currentOrb + " " + c.soundFile + " ~" + parseInt(degabs);
 			}
 		}
 	});
@@ -407,48 +408,58 @@ function updateAura() {
 function swingCam(a, b) {
 
 	//lon = soundPos[b]; // testing
-	var from = soundPos[a],
-		to = soundPos[b];
+	//console.log(a, b);
+
+	var from = soundPos[a-1],
+		to = soundPos[b-1];
 
 	// Edges
-	if (a == 0 && b > 1) {
+	if (a == 1 && b > 2) {
 		from = 360;
 	} else if (b == 0 && a > 1) {
 		to = 360;
 	}
 
+	PANO.swinging = true;
+
 	// Start animation
 	tween = new TWEEN
-		.Tween({ lon: from })
+		.Tween({ lon: lon })
 		.to({ lon: to }, 2000 )
 		.easing( TWEEN.Easing.Cubic.Out )
-		.onUpdate(function () {
-			lon = this.lon;
-		}).start();
+		.onUpdate(function () { lon = this.lon; })
+		.onComplete(function() { PANO.swinging = false;	})
+		.start();
 
 } // -swingTo
 
 function initUI() {
 
-	$('#next').click(function() {
+	$('#next').on('mousedown', function() {
+		if (PANO.swinging) return;
 		var from = currentOrb;
-		currentOrb = (++currentOrb == orbs.length) ? 0 : currentOrb;
+		currentOrb = (from==orbs.length) ? 0 : from+1;
 		swingCam(from, currentOrb);
 	});
 
-	$('#prev').click(function() {
+	$('#prev').on('mousedown', function() {
+		if (PANO.swinging) return;
 		var from = currentOrb;
-		currentOrb = (--currentOrb == -1) ? orbs.length-1 : currentOrb;
+		currentOrb = (from==1) ? orbs.length : from-1;
 		swingCam(from, currentOrb);
 	});
 
-	$('#play').click(function() {
+	$('#play').on('mousedown', function() {
 		PANO.mute = !PANO.mute;
 		$(this).html( PANO.mute ? "&#9656;" : "||" );
 		orbs.forEach(function(c) {
 			if (PANO.mute) { c.sound.source.stop(0); }
 			else { c.sound.source.start(audio.context.currentTime + 0.020); }
 		});
+	});
+
+	$('.close').click(function() {
+		$(this).parent().hide();
 	});
 
 } // -initUI
