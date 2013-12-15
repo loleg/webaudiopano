@@ -12,18 +12,19 @@ lat = 0, onMouseDownLat = 0,
 phi = 0, theta = 0;
 
 var orbs = [], sounds = [];
+var soundFiles = [], soundPos = [], soundYos = [], soundTxt = [];
 var currentOrb = 0, swinging = false;
 var audio, mute = false;
 var loading = 0;
-var soundFiles = [];
-var soundPos = [];
 
 // Load configuration
 PANO.sounds.forEach(function(s) {
 	if (s.length < 2) 
 		return console.error("Invalid config", s);
 	soundFiles.push(s[0]);
-	soundPos.push(s[1]);
+	soundPos.push( s.length>0 ? s[1] : null);
+	soundYos.push( s.length>1 ? s[2] : 0);
+	soundTxt.push( s.length>2 ? s[3] : null);
 });
 if (PANO.helper) {
 	document.write('<div id="crosshair"></div>');
@@ -236,8 +237,9 @@ function onDocumentMouseDown( event ) {
 	var intersects = raycaster.intersectObjects( scene.children );
 
 	if ( intersects.length > 1 ) {
-		var nm = intersects[0].object.name;
-		PANO.popup(nm);
+		var ix = intersects[0].object.index;
+		if (soundTxt[ix]) PANO.popup(soundTxt[ix]);
+		swingCam(currentOrb, ix+1);
 	}
 }
 
@@ -334,11 +336,7 @@ function initOrbs() {
 
 		var X = Math.cos( segment ) * amplitude;
 		var Z = Math.sin( segment ) * amplitude;
-		
-		var Y = 0;
-		if (PANO.sounds[i][2]) {
-			Y = PANO.sounds[i][2];
-		}
+		var Y = soundYos[i];
 
 		var cube = new THREE.Mesh( 
 				new THREE.CubeGeometry( 1, 1, 1 ), 
@@ -356,6 +354,7 @@ function initOrbs() {
 				new THREE.MeshBasicMaterial( { color: 0x0000ff, transparent: true, opacity: 0.4 } )
 			);
 		sign.name = "Orb " + cube.soundFile;
+		sign.index = i;
 		sign.visible = PANO.helper;
 		sign.position.set(X, Y, Z);
 		cube.origin = sign.position;
@@ -458,8 +457,8 @@ function initUI() {
 		});
 	});
 
-	$('.close').click(function() {
-		$(this).parent().hide();
+	$('.modal .close').click(function() {
+		$('.modal').hide();
 	});
 
 } // -initUI
@@ -474,10 +473,9 @@ PANO.popup = function(message) {
 	// get the screen height and width  
 	var maskHeight = $(window).height();  
 	var maskWidth = $(window).width();
-	var dialogHeight = 300;
-	$('#dialog-box').height(300);
-	var dialogWidth = 400;
-	$('#dialog-box').width(400);
+	var dialogWidth = 550, dialogHeight = 370;
+	$('#dialog-box').width(dialogWidth);
+	$('#dialog-box').height(dialogHeight);
 	
 	// calculate the values for center alignment
 	var dialogTop =  (maskHeight/2) - (dialogHeight/2);  
@@ -485,6 +483,26 @@ PANO.popup = function(message) {
 	
 	// assign values to the overlay and dialog box
 	$('#dialog-overlay').css({height:maskHeight, width:maskWidth}).show();
-	$('#dialog-box').css({top:dialogTop, left:dialogLeft}).show();
+	$('#dialog-box').css({top:dialogTop, left:dialogLeft}).fadeIn();
 			
 }; // -PANO.popup
+
+(function($){
+  $.extend($.fn, {
+    fadeIn: function(ms){
+      if(typeof(ms) === 'undefined'){
+        ms = 1000;
+      }
+      var self = this;
+      $(self).css({'display':'block','opacity':0});
+      new TWEEN
+		.Tween({ o: 0 })
+		.to({ o: 1 }, ms )
+		.easing( TWEEN.Easing.Cubic.Out )
+		.onUpdate(function() { $(self).css('opacity', this.o); })
+		.start();
+
+      return this;
+    }
+  })
+})(Zepto);
