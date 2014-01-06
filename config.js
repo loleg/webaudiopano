@@ -27,9 +27,7 @@ PANO.sounds = [
 	[ "L'Argo.mp3", 113, -1 ],
 	[ "Jesrad.mp3", 181, -4 ],
 	[ "Combien etaient-ils.mp3", 240, -2 ],
-	[ "Chronos II.mp3", 294, -2 ],
-	//[ "D_O_M_Collage_Mockup_v1.mp3" ],
-	//[ "Dreams_Themes_BacktoBack_ref-01.mp3" ],
+	[ "Chronos II.mp3", 294, -2 ]
 ];
 
 /* 
