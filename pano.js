@@ -38,6 +38,7 @@ initAura();
 initScene();
 initOrbs();
 initUI();
+initWelcome();
 
 animate(); // go!
 
@@ -108,6 +109,31 @@ function loadSound(soundFileName) {
 			  sound.buffer = buffer;
 			  sound.source.buffer = sound.buffer;
 			  loadProgress(1);
+			});
+	}, 250);
+
+	return sound;
+}
+
+function loadPlainSound(soundFileName, soundVolume) {
+	var ctx = audio.context;
+
+	var sound = {};
+	sound.source = ctx.createBufferSource();
+	sound.source.loop = true;
+	sound.volume = ctx.createGain();
+	if (typeof soundVolume !== 'undefined')
+		sound.volume.gain.value = soundVolume;
+
+	sound.source.connect(sound.volume);
+	sound.volume.connect(audio.destination);
+
+	setTimeout(function(){
+		loadBuffer(soundFileName, 
+			function(buffer){
+			  sound.buffer = buffer;
+			  sound.source.buffer = sound.buffer;
+			  sound.source.start(audio.context.currentTime);
 			});
 	}, 250);
 
@@ -245,7 +271,7 @@ function onDocumentMouseDown( event ) {
 	if ( intersects.length > 1 ) {
 		var ix = intersects[0].object.index;
 		if (soundTxt[ix]) PANO.popup(soundTxt[ix]);
-		swingCam(currentOrb, ix+1);
+		swingTo(ix+1);
 	}
 }
 
@@ -413,20 +439,9 @@ function updateAura() {
 
 } // -updateAura
 
-function swingCam(a, b) {
+function swingTo(a) {
 
-	//lon = soundPos[b]; // testing
-	//console.log(a, b);
-
-	var from = soundPos[a-1],
-		to = soundPos[b-1];
-
-	// Edges
-	if (a == 1 && b > 2) {
-		from = 360;
-	} else if (b == 0 && a > 1) {
-		to = 360;
-	}
+	var to = soundPos[a-1];
 
 	PANO.swinging = true;
 
@@ -441,20 +456,30 @@ function swingCam(a, b) {
 
 } // -swingTo
 
+function initWelcome() {
+
+	if (typeof PANO.bgsound !== 'undefined')
+		loadPlainSound('sound/' + PANO.bgsound[0], PANO.bgsound[1]);
+
+	if (typeof PANO.welcome !== 'undefined')
+		PANO.popup(PANO.welcome);
+
+}
+
 function initUI() {
 
 	$('#next').on('mousedown', function() {
-		if (PANO.swinging) return;
+		if (PANO.swinging) tween.stop();
 		var from = currentOrb;
-		currentOrb = (from==orbs.length) ? 0 : from+1;
-		swingCam(from, currentOrb);
+		currentOrb = (from>=orbs.length) ? 1 : from+1;
+		swingTo(currentOrb);
 	});
 
 	$('#prev').on('mousedown', function() {
-		if (PANO.swinging) return;
+		if (PANO.swinging) tween.stop();
 		var from = currentOrb;
-		currentOrb = (from==1) ? orbs.length : from-1;
-		swingCam(from, currentOrb);
+		currentOrb = (from<=1) ? orbs.length : from-1;
+		swingTo(currentOrb);
 	});
 
 	$('#play').on('mousedown', function() {

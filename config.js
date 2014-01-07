@@ -34,7 +34,7 @@ PANO.sounds = [
 ];
 
 /* Optional background source, and it's loudness from 0 to 1*/
-PANO.bgsound = [ "Center Speakers.mp3", 1.0 ];
+PANO.bgsound = [ "Center Speakers.mp3" ];
 
 /* 
  When true, shows blue orbs ("helpers") at the sound locations,
