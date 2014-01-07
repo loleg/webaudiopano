@@ -495,6 +495,15 @@ function initUI() {
 		$('.modal').hide();
 	});
 
+	document.onkeydown = function(e) {
+		if (!e) e = window.event;
+		if (e.keyCode) {
+			if (e.keyCode == "27") $('.modal').hide();
+		} else if (e.charCode) {
+			if (e.charCode == "27") $('.modal').hide();
+		}
+	};
+
 } // -initUI
 
 }; // PANO.main
