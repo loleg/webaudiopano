@@ -17,6 +17,8 @@ var currentOrb = 0, swinging = false;
 var audio, mute = false;
 var loading = 0;
 
+var is_firefox = /firefox/i.test(navigator.userAgent);
+
 // Load configuration
 PANO.sounds.forEach(function(s) {
 	if (s.length < 2) 
@@ -119,40 +121,44 @@ function loadProgress(dir) {
 	$('#pctx').html('loading ' + pc);
 }
 
-function setPositionAndVelocity(object, audioNode, x, y, z, dt) {
+function setPosition(object, soundObject, x, y, z) {
 
-	//var p = object.matrixWorld.getPosition();
 	var p = new THREE.Vector3()
 			.getPositionFromMatrix(object.matrixWorld);
+
 	var px = p.x, py = p.y, pz = p.z;
 	object.position.set(x,y,z);
 	object.updateMatrixWorld();
-	//var q = object.matrixWorld.getPosition();
+
 	var q = new THREE.Vector3()
 			.getPositionFromMatrix(object.matrixWorld);
+
 	var dx = q.x-px, dy = q.y-py, dz = q.z-pz;
-	audioNode.setPosition(q.x, q.y, q.z);
+
+	soundObject.setPosition(q.x, q.y, q.z);
+
 }
 
-function setPosition(object, x, y, z, dt) {
+function setOrientation(object, soundObject, x, y, z) {
 
-	setPositionAndVelocity(object, object.sound.panner, x, y, z, dt);
-	var vec = new THREE.Vector3(0,0,1);
 	var m = object.matrixWorld;
 	var mx = m.n14, my = m.n24, mz = m.n34;
 	m.n14 = m.n24 = m.n34 = 0;
+	
+	var vec = new THREE.Vector3(0,0,1);
 	vec.applyMatrix3(m);
-	//m.multiplyVector3(vec);
 	vec.normalize();
-	object.sound.panner.setOrientation(vec.x, vec.y, vec.z);
+
+	soundObject.setOrientation(vec.x, vec.y, vec.z);
+
 	m.n14 = mx;
 	m.n24 = my; 
 	m.n34 = mz;
 }
 
-function setListenerPosition(object, x, y, z, dt) {
+function setListenerPosition(object, x, y, z) {
 	
-	setPositionAndVelocity(object, audio.context.listener, x, y, z, dt);
+	setPosition(object, audio.context.listener, x, y, z);
 
 	var m = object.matrix;
 	var mx = m.n14, my = m.n24, mz = m.n34;
@@ -371,9 +377,12 @@ function updateAura() {
 
 	var cp = camera.position;
 	var camZ = cp.z, camX = cp.x, camY = cp.y;
-	setListenerPosition(camera, camX, camY, camZ, 0);
+	setListenerPosition(camera, camX, camY, camZ);
 
 	var cx = camX, cy = camY, cz = camZ;
+
+	// Move sound source slightly in Firefox
+	cy += (is_firefox) ? 0.5 : 0;
 
 	var cl = orbs.length;
 
@@ -389,10 +398,10 @@ function updateAura() {
 			dist = Math.abs(360 - degabs);
 
 		if (dist > maxdist) {
-			setPosition(c, 99999, 0, 0, 0);	
+			setPosition(c, c.sound.panner, 11111, 0, 0);	
 		} else {
 			var offset = Math.pow(( theta - c.orient )*5,3);
-			setPosition(c, cx, cy, cz + offset, 0);
+			setPosition(c, c.sound.panner, cx, cy, cz + offset);
 			if (!PANO.swinging) currentOrb = i + 1;
 
 			// For debugging
