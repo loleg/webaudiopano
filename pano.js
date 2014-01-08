@@ -252,6 +252,7 @@ function onWindowResize() {
 }
 
 function onDocumentMouseDown( event ) {
+	if ($('html, body').scrollTop() > FLOOR_FREEZE) return;
 	event.preventDefault();
 
 	isUserInteracting = true;
@@ -275,10 +276,22 @@ function onDocumentMouseDown( event ) {
 	}
 }
 
+var FLOOR_SCROLL = -30;
+var FLOOR_BOTTOM = -42;
+var FLOOR_FACTOR = 18;
+var FLOOR_FREEZE = FLOOR_FACTOR * (FLOOR_SCROLL - FLOOR_BOTTOM);
+
 function onDocumentMouseMove( event ) {
 	if ( isUserInteracting ) {
 		lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
 		lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+		if (lat < FLOOR_SCROLL) {
+			if (lat < FLOOR_BOTTOM) { lat = FLOOR_BOTTOM; return; }
+			$('html, body').scrollTop(FLOOR_FACTOR * (FLOOR_SCROLL - lat));
+			$('body').css('overflow-y', 'scroll');
+		} else {
+			$('body').css('overflow-y', 'hidden');
+		}
 	}
 }
 
@@ -287,6 +300,9 @@ function onDocumentMouseUp( event ) {
 }
 
 function onDocumentMouseWheel( event ) {
+
+	if ($('html, body').scrollTop() > FLOOR_FREEZE) return;
+
 	// WebKit
 	if ( event.wheelDeltaY ) {
 		fov -= event.wheelDeltaY * 0.05;
@@ -467,6 +483,8 @@ function initWelcome() {
 }
 
 function initUI() {
+
+	$('html, body').scrollTop(0); // reset to top
 
 	$('#next').on('mousedown', function() {
 		if (PANO.swinging) tween.stop();

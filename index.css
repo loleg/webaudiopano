@@ -198,3 +198,10 @@ button.close:hover {
 	padding:0; 
 	height:50px;
 }
+
+/* Website content below pano */
+
+#website {
+	background: #fff; color: #999;
+	padding: 1em; margin: 1em;
+}
