@@ -205,4 +205,5 @@ button.close:hover {
 #website {
 	background: #fff; color: #555;
 	padding: 1em 2em; margin: 1em;
+	visibility: hidden;
 }

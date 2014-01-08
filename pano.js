@@ -496,6 +496,7 @@ function initWelcome() {
 function initUI() {
 
 	$('html, body').scrollTop(0); // reset to top
+	$('#website').css('visibility', 'visible');
 
 	$('#next').on('mousedown', function() {
 		if (PANO.swinging) return;
