@@ -27,10 +27,9 @@ PANO.welcome = "<h2>Hello World</h2>Lorum ipsum.";
 PANO.sounds = [
 	[ "La Chambre.mp3", 74, -1, "<h2>Hello World</h2>Lorum ipsum."  ],
 	[ "L'Argo.mp3", 113, -1, '<br><iframe src="//player.vimeo.com/video/62075663" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> <p><a href="http://vimeo.com/62075663">Polly Scattergood - Wanderlust</a> from <a href="http://vimeo.com/mutesong">Mute</a> on <a href="https://vimeo.com">Vimeo</a>.</p>' ],
-	/*
 	[ "Jesrad.mp3", 181, -4 ],
 	[ "Combien etaient-ils.mp3", 240, -2 ],
-	[ "Chronos II.mp3", 294, -2 ]*/
+	[ "Chronos II.mp3", 294, -2 ]
 ];
 
 /* Optional background source, and it's loudness from 0 to 1*/
@@ -41,4 +40,4 @@ PANO.bgsound = [ "Center Speakers.mp3" ];
  the sound currently playing, and orientation of the camera in 
  the browser title.
 */
-PANO.helper = true;
+PANO.helper = false;

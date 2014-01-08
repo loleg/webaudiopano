@@ -424,7 +424,7 @@ function updateAura() {
 	var cx = camX, cy = camY, cz = camZ;
 
 	// Move sound source slightly in Firefox
-	cy += (is_firefox) ? 0.5 : 0;
+	cx += (is_firefox) ? 0.5 : 0;
 
 	var cl = orbs.length;
 
@@ -459,16 +459,22 @@ function swingTo(a) {
 
 	var to = soundPos[a-1];
 
+	// Wrap around
+	if (a == 1 && lon >= soundPos[parseInt(soundPos.length/2)]) to += 360;
+	if (a > soundPos.length/2 && lon <= soundPos[0]) to -= 360;
+
 	PANO.swinging = true;
 
 	// Start animation
-	tween = new TWEEN
-		.Tween({ lon: lon })
-		.to({ lon: to }, 2000 )
+	tween = new TWEEN.Tween({ lon: lon })
 		.easing( TWEEN.Easing.Cubic.Out )
 		.onUpdate(function () { lon = this.lon; })
-		.onComplete(function() { PANO.swinging = false;	})
-		.start();
+		.onComplete(function() { 
+			PANO.swinging = false;
+			if (lon < 0) lon += 360;
+			if (lon > 360) lon -= 360;
+		})
+		.to({ lon: to }, 2000 ).start();
 
 } // -swingTo
 
@@ -487,14 +493,14 @@ function initUI() {
 	$('html, body').scrollTop(0); // reset to top
 
 	$('#next').on('mousedown', function() {
-		if (PANO.swinging) tween.stop();
+		if (PANO.swinging) return;
 		var from = currentOrb;
 		currentOrb = (from>=orbs.length) ? 1 : from+1;
 		swingTo(currentOrb);
 	});
 
 	$('#prev').on('mousedown', function() {
-		if (PANO.swinging) tween.stop();
+		if (PANO.swinging) return;
 		var from = currentOrb;
 		currentOrb = (from<=1) ? orbs.length : from-1;
 		swingTo(currentOrb);
