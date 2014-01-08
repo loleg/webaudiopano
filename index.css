@@ -81,9 +81,9 @@ body {
 
 #controls button {
 	font: 2em sans-serif;
-	padding: 0.5em 0.8em;
+	padding: 0.5em 0.6em;
 	color: #aaa; 
-	border: 1px solid #aaa;
+	border: 1px solid transparent;
 	border-radius: 1.2em;
 	background: transparent;
 	opacity: 0.8;
@@ -92,6 +92,7 @@ body {
 
 #controls button:hover {
 	background: rgba(255,255,255,0.2);
+	border: 1px solid #aaa;
 }
 
 #dialog-overlay {

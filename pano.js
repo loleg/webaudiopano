@@ -253,6 +253,7 @@ function onWindowResize() {
 
 function onDocumentMouseDown( event ) {
 	if ($('html, body').scrollTop() > FLOOR_FREEZE) return;
+
 	event.preventDefault();
 
 	isUserInteracting = true;
@@ -281,17 +282,21 @@ var FLOOR_BOTTOM = -42;
 var FLOOR_FACTOR = 18;
 var FLOOR_FREEZE = FLOOR_FACTOR * (FLOOR_SCROLL - FLOOR_BOTTOM);
 
+function scrollPageWithLat() {
+	if (lat < FLOOR_SCROLL) {
+		$('html, body').scrollTop(FLOOR_FACTOR * (FLOOR_SCROLL - lat));
+		$('body').css('overflow-y', 'scroll');
+	} else {
+		$('body').css('overflow-y', 'hidden');
+	}
+}
+
 function onDocumentMouseMove( event ) {
 	if ( isUserInteracting ) {
 		lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
 		lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
-		if (lat < FLOOR_SCROLL) {
-			if (lat < FLOOR_BOTTOM) { lat = FLOOR_BOTTOM; return; }
-			$('html, body').scrollTop(FLOOR_FACTOR * (FLOOR_SCROLL - lat));
-			$('body').css('overflow-y', 'scroll');
-		} else {
-			$('body').css('overflow-y', 'hidden');
-		}
+		if (lat < FLOOR_BOTTOM) { lat = FLOOR_BOTTOM; return; }
+		scrollPageWithLat();
 	}
 }
 
@@ -506,13 +511,12 @@ function initUI() {
 		swingTo(currentOrb);
 	});
 
-	$('#play').on('mousedown', function() {
-		PANO.mute = !PANO.mute;
-		$(this).html( PANO.mute ? "&#9656;" : "||" );
-		orbs.forEach(function(c) {
-			if (PANO.mute) { c.sound.source.stop(0); }
-			else { c.sound.source.start(audio.context.currentTime + 0.020); }
-		});
+	$('#down').on('mousedown', function() {
+		if (PANO.swinging) tween.stop();
+		tween = new TWEEN.Tween({ lat: lat })
+			.easing( TWEEN.Easing.Cubic.Out )
+			.onUpdate(function () { lat = this.lat; scrollPageWithLat(); })
+			.to({ lat: FLOOR_BOTTOM-1 }, 1000 ).start();
 	});
 
 	$('.modal .close').click(function() {
