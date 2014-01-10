@@ -17,7 +17,13 @@ var currentOrb = 0, swinging = false;
 var audio, mute = false;
 var loading = 0;
 
+var FLOOR_SCROLL = -30;
+var FLOOR_BOTTOM = -42;
+var FLOOR_FACTOR = 18;
+var FLOOR_FREEZE = FLOOR_FACTOR * (FLOOR_SCROLL - FLOOR_BOTTOM);
+
 var is_firefox = /firefox/i.test(navigator.userAgent);
+var htmlbody = $('html, body');
 
 // Load configuration
 PANO.sounds.forEach(function(s) {
@@ -252,10 +258,9 @@ function onWindowResize() {
 }
 
 function onDocumentMouseDown( event ) {
-	if ($('html, body').scrollTop() > FLOOR_FREEZE) return;
+	//if (!scrollIsTop()) return;
 
 	event.preventDefault();
-
 	isUserInteracting = true;
 
 	onPointerDownPointerX = event.clientX;
@@ -277,22 +282,8 @@ function onDocumentMouseDown( event ) {
 	}
 }
 
-var FLOOR_SCROLL = -30;
-var FLOOR_BOTTOM = -42;
-var FLOOR_FACTOR = 18;
-var FLOOR_FREEZE = FLOOR_FACTOR * (FLOOR_SCROLL - FLOOR_BOTTOM);
-
-function scrollPageWithLat() {
-	if (lat < FLOOR_SCROLL) {
-		$('html, body').scrollTop(FLOOR_FACTOR * (FLOOR_SCROLL - lat));
-		$('body').css('overflow-y', 'scroll');
-	} else {
-		$('body').css('overflow-y', 'hidden');
-	}
-}
-
 function onDocumentMouseMove( event ) {
-	if ( isUserInteracting ) {
+	if (isUserInteracting && !PANO.swinging) {
 		lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
 		lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
 		if (lat < FLOOR_BOTTOM) { lat = FLOOR_BOTTOM; return; }
@@ -302,11 +293,16 @@ function onDocumentMouseMove( event ) {
 
 function onDocumentMouseUp( event ) {
 	isUserInteracting = false;
+	scrollIsTop();
 }
 
 function onDocumentMouseWheel( event ) {
 
-	if ($('html, body').scrollTop() > FLOOR_FREEZE) return;
+	if (htmlbody.scrollTop() > 0) {
+		return;
+	} else {
+		event.preventDefault();
+	}
 
 	// WebKit
 	if ( event.wheelDeltaY ) {
@@ -493,9 +489,31 @@ function initWelcome() {
 
 }
 
+function scrollPageWithLat() {
+	if (lat < FLOOR_SCROLL) {
+		htmlbody.scrollTop(FLOOR_FACTOR * (FLOOR_SCROLL - lat));
+	} else {
+		htmlbody.scrollTop(0);
+	}
+}
+
+function scrollIsTop() {
+	if (lat < FLOOR_SCROLL || htmlbody.scrollTop() > 0) {
+		$('body').css('overflow-y', 'scroll');
+		$('#controls').css('margin-left', '7px');
+		$('#down').html('&#8673;'); // up arrow
+		return false;
+	} else {
+		$('body').css('overflow-y', 'hidden');
+		$('#controls').css('margin-left', '0');
+		$('#down').html('&#8675;'); // down arrow
+		return true;
+	}
+}
+
 function initUI() {
 
-	$('html, body').scrollTop(0); // reset to top
+	htmlbody.scrollTop(0); // reset to top
 	$('#website').css('visibility', 'visible');
 
 	$('#next').on('mousedown', function() {
@@ -503,22 +521,33 @@ function initUI() {
 		var from = currentOrb;
 		currentOrb = (from>=orbs.length) ? 1 : from+1;
 		swingTo(currentOrb);
-	});
+
+	}).on('mouseup', function() { isUserInteracting = false; });
 
 	$('#prev').on('mousedown', function() {
 		if (PANO.swinging) return;
 		var from = currentOrb;
 		currentOrb = (from<=1) ? orbs.length : from-1;
 		swingTo(currentOrb);
-	});
+
+	}).on('mouseup', function() { isUserInteracting = false; });
 
 	$('#down').on('mousedown', function() {
 		if (PANO.swinging) tween.stop();
+
+		// Create a vertical tween
 		tween = new TWEEN.Tween({ lat: lat })
 			.easing( TWEEN.Easing.Cubic.Out )
-			.onUpdate(function () { lat = this.lat; scrollPageWithLat(); })
-			.to({ lat: FLOOR_BOTTOM-1 }, 1000 ).start();
-	});
+			.onUpdate(function() { lat = this.lat; scrollPageWithLat(); })
+			.onComplete(function() { PANO.swinging = false; scrollIsTop(); });
+
+		// Pan camera down or up
+		PANO.swinging = true;
+		var tgtlat = (lat >= FLOOR_SCROLL) ? FLOOR_BOTTOM : 0;
+		tween.to({ lat: tgtlat }, 1000 ).start();
+
+	// -#down
+	}).on('mouseup', function() { isUserInteracting = false; });
 
 	$('.modal .close').click(function() {
 		$('.modal').hide();
