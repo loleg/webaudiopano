@@ -263,6 +263,8 @@ function onDocumentMouseDown( event ) {
 	event.preventDefault();
 	isUserInteracting = true;
 
+	if (PANO.swinging) { tween.stop(); PANO.swinging = false; }
+
 	onPointerDownPointerX = event.clientX;
 	onPointerDownPointerY = event.clientY;
 
@@ -440,11 +442,16 @@ function updateAura() {
 		if (i == 0 && degabs > 180) 
 			dist = Math.abs(360 - degabs);
 
-		if (dist > maxdist) {
+		// Fade distant orbs
+		if (dist > maxdist * 10) {
 			setPosition(c, c.sound.panner, 11111, 0, 0);	
 		} else {
 			var offset = Math.pow(( theta - c.orient )*5,3);
 			setPosition(c, c.sound.panner, cx, cy, cz + offset);
+		}
+
+		if (dist <= maxdist) {
+			// Determine central orb
 			if (!PANO.swinging) currentOrb = i + 1;
 
 			// For debugging
@@ -516,24 +523,27 @@ function initUI() {
 	htmlbody.scrollTop(0); // reset to top
 	$('#website').css('visibility', 'visible');
 
-	$('#next').on('mousedown', function() {
+	$('#next').on('mousedown', function(e) {
 		if (PANO.swinging) return;
+		e.stopPropagation();
 		var from = currentOrb;
 		currentOrb = (from>=orbs.length) ? 1 : from+1;
 		swingTo(currentOrb);
 
 	}).on('mouseup', function() { isUserInteracting = false; });
 
-	$('#prev').on('mousedown', function() {
+	$('#prev').on('mousedown', function(e) {
 		if (PANO.swinging) return;
+		e.stopPropagation();
 		var from = currentOrb;
 		currentOrb = (from<=1) ? orbs.length : from-1;
 		swingTo(currentOrb);
 
 	}).on('mouseup', function() { isUserInteracting = false; });
 
-	$('#down').on('mousedown', function() {
+	$('#down').on('mousedown', function(e) {
 		if (PANO.swinging) tween.stop();
+		e.stopPropagation();
 
 		// Create a vertical tween
 		tween = new TWEEN.Tween({ lat: lat })
